@@ -34,12 +34,29 @@ services:
     volumes:
       - /home/ta/.ssh:/var/agent1/.ssh
 
-  consul:
-    image: consul:1.12.0
-    container_name: consul
+  vault:
+    image: hashicorp/vault
+    container_name: vault-new
+    environment:
+     VAULT_ADDR: "http://localhost:8200"
+     VAULT_API_ADDR: "http://localhost:8200"
+     VAULT_ADDRESS: "http://localhost:8200"
+
+      # VAULT_UI: true
+      # VAULT_TOKEN:
     ports:
-      - "8500:8500"
-      - "8600:8600/udp"
+      - "8200:8200"
+      - "8201:8201"
+    restart: always
+    volumes:
+      - /home/ta/vault/logs:/vault/logs/:rw
+      - /home/ta/vault/config/:/vault/config/:rw
+      - /home/ta/vault/data:/vault/data/:rw
+      - /home/ta/vault/certs:/certs/:rw
+      - /home/ta/vault/file:/vault/file/:rw
+    cap_add:
+      - IPC_LOCK
+    entrypoint: vault server -config /vault/config/config.hcl
 
 volumes:
   jenkins_home:
