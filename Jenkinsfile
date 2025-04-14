@@ -6,7 +6,7 @@ pipeline {
   stages {
     stage('Fetch AWS creds from Vault') {
       steps {
-        withVault([vaultSecrets: [[path: 'secret/aws/aws/jenkins', secretValues: [
+        withVault([vaultSecrets: [[path: 'secret/data/aws/aws/jenkins', secretValues: [
           [envVar: 'AWS_ACCESS_KEY_ID', vaultKey: 'access_key_id'],
           [envVar: 'AWS_SECRET_ACCESS_KEY', vaultKey: 'secret_access_key']
         ]]]]) {
