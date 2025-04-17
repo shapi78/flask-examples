@@ -13,7 +13,7 @@ pipeline {
             curl --silent --fail --header "X-Vault-Token: $VAULT_TOKEN" \
                  --request POST \
                  --data '{"data": {"nginx_port": "6789"}}' \
-                 $VAULT_ADDR/v1/secret/data/nginx
+                 $VAULT_ADDR/secret/data/nginx
           '''
         }
       }
