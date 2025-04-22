@@ -25,14 +25,6 @@ services:
       - /home/ta/nexus-data:/nexus-data
       - /opt/sonatype-work/nexus3/ssl:/opt/sonatype-work/nexus3/etc/ssl
 
-  agent1:
-    image: jenkins/ssh-agent
-    container_name: agent1
-    restart: always
-    environment:
-      - JENKINS_AGENT_SSH_PUBKEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDIi4hghZ8FG9GJmFnM3Gtwgyz3fvh7K97p8O/P9hL9ynm+xIoiRit7TDKjkJ/H5nW1ysDm+jHggKJyoIvgsIMKK2+aq/I/Ji/EnQWo+TZpaiSw+RYXfoppGyZ+elLVV2Z78p5SxKacQYPTbASxuNXWnATsR0OhxAQhxqffTCL1BoIk9i9AVJLZQgAQjVC+Ojmkh1d1ZxQdqkRgB9CCmi0+YVW+b75gSQl3xM4liUtC7GsAp7IwcJqbULMJ0tLkkQ8fX7/WOd/0X1fQhhtPtlWBh7TtgLE7P+aN2w9C1IJw8btxdFNJQAYZaTcCdiKj/x0JDvT3xn/Iikb9xfTp/BBZrksjN792olwAMZBdaZStOHBDErTsFyEa5e+DklP+qzeULJp94onHeSLow440gG+LCh6HxZA36OuKh5gTbH0rjNg2GiESiVmq6KcvM4tAF89ah/8ZhVXHJtVa9eu8CP1YPn2yl3kHdxyJoDAbSqPKl3nbfbOfOiTkowm4VNaVKuM= ta@12312
-    volumes:
-      - /home/ta/.ssh:/var/agent1/.ssh
 
   vault:
     image: hashicorp/vault
