@@ -1,34 +1,29 @@
 pipeline {
-  agent any
+    agent any
 
-  environment {
-    VAULT_ADDR = 'http://vault-new:8200'
-  }
-
-  stages {
-    stage('Fetch AWS Secret Key from Vault') {
-      steps {
-        withVault([
-          vaultSecrets: [[
-            path: 'secret/aws/aws/jenkins',
-            secretValues: [
-              [envVar: 'AWS_ACCESS_KEY_ID', vaultKey: 'access_key_id'],
-              [envVar: 'AWS_SECRET_ACCESS_KEY', vaultKey: 'secret_access_key']
-            ]
-          ]]
-        ]) {
-          script {
-            echo "AWS credentials fetched from Vault."
-          }
+    stages {
+        stage('Fetch AWS Secret Key from Vault') {
+            steps {
+                withVault(
+                    configuration: [vaultCredentialId: 'vault-token'],
+                    vaultSecrets: [
+                        [path: 'secret/aws', secretValues: [
+                            [envVar: 'AWS_SECRET', vaultKey: 'secret-key']
+                        ]]
+                    ]
+                ) {
+                    // You can now use $AWS_SECRET here
+                    sh 'echo "Fetched secret: $AWS_SECRET"'
+                }
+            }
         }
-      }
-    }
 
-    stage('Use AWS CLI') {
-      steps {
-        sh 'aws sts get-caller-identity'
-      }
+        stage('Use AWS CLI') {
+            steps {
+                sh 'aws configure set aws_secret_access_key $AWS_SECRET'
+                // continue with your AWS CLI steps...
+            }
+        }
     }
-  }
 }
 
