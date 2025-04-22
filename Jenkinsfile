@@ -1,30 +1,42 @@
 pipeline {
     agent any
 
+    environment {
+        VAULT_ADDR = 'http://vault-new:8200'     
+        VAULT_TOKEN = credentials('vault-token')    
+        SECRET_PATH = 'secret/data/aws/aws/jenkins' 
+    }
+
     stages {
-        stage('Fetch AWS Secret Key from Vault') {
+        stage('Fetch AWS Secret from Vault )') {
             steps {
-                withVault(
-                    configuration: [vaultCredentialId: 'vault-token'],  // Make sure this credential ID is correct
-                    vaultSecrets: [
-                        [path: 'secret/aws/aws/jenkins', secretValues: [
-                            [envVar: 'AWS_ACCESS_KEY_ID', vaultKey: 'access_key_id'],
-                            [envVar: 'AWS_SECRET_ACCESS_KEY', vaultKey: 'secret_access_key']
-                        ]]
-                    ]
-                ) {
-                    // You can now use $AWS_ACCESS_KEY_ID and $AWS_SECRET_ACCESS_KEY here
-                    sh 'echo "Fetched AWS Access Key: $AWS_ACCESS_KEY_ID"'
-                    sh 'echo "Fetched AWS Secret Key: $AWS_SECRET_ACCESS_KEY"'
-                }
+                sh '''
+                echo "Getting secret from Vault..."
+
+                # Fetch the secret from Vault KV v2 API
+                response=$(curl -s --header "X-Vault-Token: $VAULT_TOKEN" \
+                    --request GET "$VAULT_ADDR/v1/$SECRET_PATH")
+
+                echo "Vault raw response: $response"
+
+                # Parse secret_access_key from the JSON using jq
+                export AWS_SECRET=$(echo "$response" | jq -r '.data.data.secret_access_key')
+
+                # Confirm it was pulled
+                echo "Fetched secret key: $AWS_SECRET"
+
+                # Export for downstream steps
+                echo "AWS_SECRET=$AWS_SECRET" >> $BASH_ENV
+                '''
             }
         }
 
         stage('Use AWS CLI') {
             steps {
-                sh 'aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID'
-                sh 'aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY'
-                // Continue with other AWS CLI steps...
+                sh '''
+                aws configure set aws_secret_access_key "$AWS_SECRET"
+                aws configure list
+                '''
             }
         }
     }
