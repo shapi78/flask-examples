@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         VAULT_ADDR = 'http://vault-new:8200'
-        VAULT_TOKEN = credentials('VAULT_TOKEN')
+        VAULT_TOKEN = credentials('vault_token')
     }
 
     stages {
