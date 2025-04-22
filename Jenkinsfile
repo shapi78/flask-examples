@@ -1,32 +1,32 @@
 pipeline {
   agent any
+
   environment {
     VAULT_ADDR = 'http://vault-new:8200'
   }
+
   stages {
-    stage('Push the port to Vault') {
+    stage('Fetch AWS Secret Key from Vault') {
       steps {
-        withCredentials([string(credentialsId: 'vault-token', variable: 'VAULT_TOKEN')]) {
-          sh '''
-            curl --silent --fail \
-              --header "X-Vault-Token: $VAULT_TOKEN" \
-              --header "Content-Type: application/json" \
-              --request POST \
-              --data '{"data":{"nginx_port":"6789"}}' \
-              $VAULT_ADDR/v1/secret-v2/data/nginx
-          '''
+        withVault([
+          vaultSecrets: [[
+            path: 'secret/aws/aws/jenkins',
+            secretValues: [
+              [envVar: 'AWS_ACCESS_KEY_ID', vaultKey: 'access_key_id'],
+              [envVar: 'AWS_SECRET_ACCESS_KEY', vaultKey: 'secret_access_key']
+            ]
+          ]]
+        ]) {
+          script {
+            echo "AWS credentials fetched from Vault."
+          }
         }
       }
     }
 
-    stage('Run Ansible Playbook') {
+    stage('Use AWS CLI') {
       steps {
-        withCredentials([string(credentialsId: 'vault-token', variable: 'VAULT_TOKEN')]) {
-          sh '''
-            ansible-playbook site.yml \
-              --extra-vars "vault_addr=$VAULT_ADDR vault_token=$VAULT_TOKEN"
-          '''
-        }
+        sh 'aws sts get-caller-identity'
       }
     }
   }
