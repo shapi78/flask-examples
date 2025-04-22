@@ -7,7 +7,7 @@ pipeline {
                 withVault(
                     configuration: [vaultCredentialId: 'vault-token'],
                     vaultSecrets: [
-                        [path: 'secret/aws', secretValues: [
+                        [path: 'secret/data/aws/aws/jenkins', secretValues: [
                             [envVar: 'AWS_SECRET', vaultKey: 'secret-key']
                         ]]
                     ]
